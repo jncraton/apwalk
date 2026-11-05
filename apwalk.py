@@ -178,14 +178,14 @@ def main():
                 bssid = next(iter(matching_bssids))
                 print(f"Testing AP MAC {row['mac_address']} via BSSID {bssid} ...")
 
-                run("nmcli", "device", "disconnect", args.interface, timeout=10)
+                run("nmcli", "device", "disconnect", args.interface, timeout=5)
                 time.sleep(1)
 
                 bssid_upper = bssid.upper()
                 profile = "ap-test-" + bssid_upper.replace(":", "-")
 
                 # Remove a leftover profile from an interrupted previous run.
-                run("nmcli", "connection", "delete", "id", profile, timeout=10)
+                run("nmcli", "connection", "delete", "id", profile, timeout=5)
 
                 addresses = []
 
@@ -199,7 +199,7 @@ def main():
                         "wifi.bssid", bssid_upper,
                         "ipv4.method", "auto",
                         "ipv6.method", "disabled",
-                        timeout=20,
+                        timeout=5,
                     )
 
                     if created.returncode == 0:
@@ -207,7 +207,7 @@ def main():
                             "nmcli", "connection", "up",
                             "id", profile,
                             "ifname", args.interface,
-                            timeout=args.dhcp_wait + 15,
+                            timeout=args.dhcp_wait,
                         )
 
                         if activated.returncode == 0:
@@ -230,8 +230,8 @@ def main():
                     continue
 
                 # Remove the temporary profile and disconnect before the next test.
-                run("nmcli", "connection", "down", "id", profile, timeout=10)
-                run("nmcli", "connection", "delete", "id", profile, timeout=10)
+                run("nmcli", "connection", "down", "id", profile, timeout=5)
+                run("nmcli", "connection", "delete", "id", profile, timeout=5)
 
                 row["bssid"] = bssid
                 row["test_status"] = (
@@ -251,7 +251,7 @@ def main():
                     + (f": {', '.join(addresses)}" if addresses else "")
                 )
 
-                run("nmcli", "device", "disconnect", args.interface, timeout=10)
+                run("nmcli", "device", "disconnect", args.interface, timeout=5)
                 time.sleep(2)
 
             if pending:
