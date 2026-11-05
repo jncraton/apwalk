@@ -213,15 +213,21 @@ def main():
                         if activated.returncode == 0:
                             time.sleep(5)
                             link = run("/usr/sbin/iw", "dev", args.interface, "link")
+                            if not link.stdout.startswith("Connected"):
+                                print("Could not associate")
+                                continue
                             print(link.stdout)
                             addresses = get_ipv4_addresses(args.interface)
                         else:
                             print(f"  Could not activate pinned profile: {activated.stderr.strip()}")
+                            continue
                     else:
                         print(f"  Could not create pinned profile: {created.stderr.strip()}")
+                        continue
 
                 except subprocess.TimeoutExpired:
                     print("  Connection attempt timed out.")
+                    continue
 
                 # Remove the temporary profile and disconnect before the next test.
                 run("nmcli", "connection", "down", "id", profile, timeout=10)
