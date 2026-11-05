@@ -123,27 +123,28 @@ def main():
 
     with args.csv_file.open(newline="") as file:
         reader = csv.DictReader(file)
-        if not reader.fieldnames or "mac" not in reader.fieldnames:
-            parser.error("CSV must have a header containing a 'mac' column")
+        if not reader.fieldnames or "mac_address" not in reader.fieldnames:
+            parser.error("CSV must have a header containing a 'mac_address' column")
         fieldnames = list(reader.fieldnames)
+        print(fieldnames)
         rows = list(reader)
 
-    for column in ("bssid", "status", "tested_at", "ipv4"):
+    for column in ("bssid", "test_status", "tested_at", "ipv4"):
         if column not in fieldnames:
             fieldnames.append(column)
 
     for row in rows:
-        row["mac"] = normalize_mac(row.get("mac", ""))
+        row["mac_address"] = normalize_mac(row.get("mac_address", ""))
         row.setdefault("bssid", "")
-        row.setdefault("status", "")
+        row.setdefault("test_status", "")
         row.setdefault("tested_at", "")
         row.setdefault("ipv4", "")
 
     # Group records by suffix so duplicate AP MAC suffixes are detected.
     rows_by_suffix = {}
     for index, row in enumerate(rows):
-        mac_suffix = suffix(row["mac"])
-        if mac_suffix and not row["status"].strip():
+        mac_suffix = suffix(row["mac_address"])
+        if mac_suffix and not row["test_status"].strip():
             rows_by_suffix.setdefault(mac_suffix, []).append(index)
 
     pending = set(rows_by_suffix)
@@ -175,7 +176,7 @@ def main():
 
                 row = rows[matching_rows[0]]
                 bssid = next(iter(matching_bssids))
-                print(f"Testing AP MAC {row['mac']} via BSSID {bssid} ...")
+                print(f"Testing AP MAC {row['mac_address']} via BSSID {bssid} ...")
 
                 run("nmcli", "device", "disconnect", args.interface, timeout=10)
                 time.sleep(1)
@@ -227,7 +228,7 @@ def main():
                 run("nmcli", "connection", "delete", "id", profile, timeout=10)
 
                 row["bssid"] = bssid
-                row["status"] = (
+                row["test_status"] = (
                     "dhcp_obtained" if addresses else "no_dhcp_observed"
                 )
                 row["tested_at"] = datetime.now(timezone.utc).isoformat(
@@ -240,7 +241,7 @@ def main():
                 tested_this_cycle = True
 
                 print(
-                    f"  {row['status']}"
+                    f"  {row['test_status']}"
                     + (f": {', '.join(addresses)}" if addresses else "")
                 )
 
