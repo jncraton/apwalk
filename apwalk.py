@@ -144,7 +144,7 @@ def main():
     rows_by_suffix = {}
     for index, row in enumerate(rows):
         mac_suffix = suffix(row["mac_address"])
-        if mac_suffix and not row["test_status"].strip():
+        if mac_suffix and not "obtained" in row["test_status"].lower():
             rows_by_suffix.setdefault(mac_suffix, []).append(index)
 
     pending = set(rows_by_suffix)
@@ -235,7 +235,7 @@ def main():
 
                 row["bssid"] = bssid
                 row["test_status"] = (
-                    "dhcp_obtained" if addresses else "no_dhcp_observed"
+                    "dhcp obtained" if addresses else "no dhcp"
                 )
                 row["tested_at"] = datetime.now(timezone.utc).isoformat(
                     timespec="seconds"
@@ -243,9 +243,11 @@ def main():
                 row["ipv4"] = ";".join(addresses)
 
                 save_csv(args.csv_file, rows, fieldnames)
-                pending.discard(mac_suffix)
                 tested_this_cycle = True
 
+                if addresses:
+                    pending.discard(mac_suffix)
+                
                 print(
                     f"  {row['test_status']}"
                     + (f": {', '.join(addresses)}" if addresses else "")
