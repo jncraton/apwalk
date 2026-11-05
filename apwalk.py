@@ -226,8 +226,12 @@ def main():
                         continue
 
                 except subprocess.TimeoutExpired:
-                    print("  Connection attempt timed out.")
-                    continue
+                    link = run("/usr/sbin/iw", "dev", args.interface, "link")
+                    if not link.stdout.startswith("Connected"):
+                        print("Connection attempt timed out without association")
+                        continue
+                    else:
+                        print("Connection attempt timed out, but associated")
 
                 # Remove the temporary profile and disconnect before the next test.
                 run("nmcli", "connection", "down", "id", profile, timeout=5)
