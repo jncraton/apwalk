@@ -126,7 +126,6 @@ def main():
         if not reader.fieldnames or "mac_address" not in reader.fieldnames:
             parser.error("CSV must have a header containing a 'mac_address' column")
         fieldnames = list(reader.fieldnames)
-        print(fieldnames)
         rows = list(reader)
 
     for column in ("bssid", "test_status", "tested_at", "ipv4"):
