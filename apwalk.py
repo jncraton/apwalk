@@ -175,7 +175,7 @@ def main():
 
                 row = rows[matching_rows[0]]
                 bssid = next(iter(matching_bssids))
-                print(f"Testing AP MAC {row['mac_address']} via BSSID {bssid} ...")
+                print(f"Testing {row.get('name', 'AP')} MAC {row['mac_address']} via BSSID {bssid} ...")
 
                 run("nmcli", "device", "disconnect", args.interface, timeout=5)
                 time.sleep(1)
