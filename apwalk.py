@@ -121,8 +121,8 @@ def main():
     if not args.csv_file.exists():
         parser.error(f"CSV file not found: {args.csv_file}")
 
-    with args.csv_file.open(newline="") as file:
-        reader = csv.DictReader(file)
+    with args.csv_file.open(newline="", encoding="utf-8-sig") as file:
+        reader = csv.DictReader(file, dialect='excel')
         if not reader.fieldnames or "mac_address" not in reader.fieldnames:
             parser.error("CSV must have a header containing a 'mac_address' column")
         fieldnames = list(reader.fieldnames)
